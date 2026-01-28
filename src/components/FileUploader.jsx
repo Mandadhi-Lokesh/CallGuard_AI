@@ -98,6 +98,13 @@ export function FileUploader({ onFileSelect }) {
                                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-brand-background/50 to-transparent" />
                             </div>
                         </label>
+                        <div className="mt-4 text-center">
+                            <p className="text-xs text-brand-muted/60">Supported formats: .wav, .mp3 (Max 10MB)</p>
+                            <p className="text-xs text-brand-muted/40 mt-1 flex items-center justify-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-brand-success/50 rounded-full"></span>
+                                Audio is processed securely on-server and not stored.
+                            </p>
+                        </div>
                     </motion.div>
                 ) : (
                     <motion.div

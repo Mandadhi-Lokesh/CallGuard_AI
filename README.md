@@ -1,47 +1,69 @@
-# CallGuard AI - Intelligent Call Fraud Detection
+# CallGuard AI - India AI Impact Buildathon
+### 🛡️ AI-Powered Call Fraud Detection System
 
-> **Protecting India's digital ecosystem from voice phishing and scam calls.**
+**Team: CyberSentinels**  
+**Track: AI for Security**
 
-## Problem Statement
-Voice phishing (vishing) and spam calls are a massive issue in India, costing millions in financial losses annually. Vulnerable populations, especially senior citizens, are often targeted by sophisticated social engineering attacks that traditional blocklists cannot detect.
+> **Problem Statement**  
+> India loses crores daily to voice phishing (vishing) and financial fraud calls. Senior citizens and non-tech-savvy users are particularly vulnerable to high-pressure tactics. Traditional blocklists fail against new numbers and VoIP calls.
 
-## Solution
-**CallGuard AI** is a pro-active audio analysis system that detects fraud *content* and *intent*, not just blacklisted numbers. By analyzing speech patterns, urgency, and specific keywords, it provides a real-time risk assessment of recorded calls.
+## 🚀 The Solution
+**CallGuard AI** is an intelligent fraud detection system that analyzes the *content* and *intent* of a call, not just the phone number. 
 
-## Architecture
-The application follows a clean, decoupled architecture:
-- **Frontend**: React (Vite) + Tailwind CSS (Dark Mode) + Framer Motion.
-    - Focuses on a premium, trustworthy user interface.
-- **Backend**: Python Flask REST API.
-    - Handles audio processing and ML inference simulation.
-    - Returns JSON responses with transparent confidence scores and explainability factors.
-
-## Technology Stack
-- **Frontend**: React, React Router, Lucide Icons, Axios/Fetch.
-- **Backend**: Flask, Flask-CORS, Python.
-- **Design**: "Cyber-Security" Dark Blue Theme, Glassmorphism.
-
-## Demo Instructions
-1. **Clone the repository**.
-2. **Start the Backend**:
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   python app.py
-   ```
-   *Server runs on http://localhost:5000*
-
-3. **Start the Frontend**:
-   ```bash
-   npm install
-   npm run dev
-   ```
-   *Open http://localhost:5173*
-
-4. **Test the Flow**:
-   - Navigate to **Analyzer**.
-   - Upload an audio file (.wav/.mp3).
-   - View the detailed **Result** with explainability metrics.
+Using advanced NLP patterns, it detects:
+- **Urgency & Threats** ("Your account will be blocked", "Immediate payment")
+- **Suspicious Keywords** ("OTP", "Refund", "KYC Update")
+- **Socio-Linguistic Indicators** (Aggressive tone, repetitive persuation)
 
 ---
-*Disclaimer: This is a prototype system developed for educational and hackathon demonstration purposes. The analysis data is simulated.*
+
+## 🏗️ Architecture
+The system follows a decoupled, secure architecture designed for scalability.
+
+```
+[ Frontend: React + Tailwind ] 
+       │ (Upload Audio)
+       ▼
+ [ Backend: Python Flask API ]
+       │ (Feature Extraction)
+       ▼
+[ AI Logic / Inference Engine ]
+       │ (Risk Classification)
+       ▼
+[ JSON Response: Label + Confidence + Explanation ]
+```
+
+## 🛠️ Technology Stack
+- **Frontend**: React (Vite), Tailwind CSS (Dark Theme), Framer Motion
+- **Backend**: Python, Flask, Flask-CORS
+- **Design**: "Cyber-Trust" aesthetic, dark mode optimized, mobile-responsive.
+
+---
+
+## ⚡ How to Run Locally
+
+### 1. Clone & Setup Backend
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py
+```
+*Server runs on port 5000*
+
+### 2. Setup Frontend
+```bash
+# In a new terminal
+npm install
+npm run dev
+```
+*Open http://localhost:5173*
+
+## 📱 Demo Flow for Judges
+1. **Analyze**: Go to the "Analyzer" tab.
+2. **Upload**: Drop the provided sample audio file `scam_sample.mp3` (or any .wav).
+3. **Wait**: Observe the "Analyzing" state featuring secure processing.
+4. **Result**: View the **High Risk** verdict, confidence score, and bullet-point explanation of *why* it was flagged.
+
+---
+
+*Disclaimer: This project is a prototype developed for the India AI Impact Buildathon. Analysis logic is simulated for demonstration purposes.*

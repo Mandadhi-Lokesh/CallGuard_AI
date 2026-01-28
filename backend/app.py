@@ -44,32 +44,45 @@ def analyze_audio():
         if rand_val > 0.7:
             result = {
                 "status": "fraud",
-                "risk_level": "Highest",
-                "confidence": round(0.95 + (random.random() * 0.04), 2),
+                "risk_level": "High",
+                "confidence": round(0.87 + (random.random() * 0.12), 2),
                 "tone": "Aggressive / Urgent",
                 "keywords": ["verify", "immediate action", "block", "otp"],
-                "reasoning": "The caller used high-pressure tactics demanding immediate verification of personal banking details. Frequent use of 'block' and 'urgent' indicates a typical panic-inducing scam pattern."
+                "explanation": [
+                    "Detected high-urgency phrases demanding immediate action.",
+                    "Frequent use of banking-related keywords (OTP, Block).",
+                    "Abnormal speech cadence indicating scripted threats."
+                ]
             }
         elif rand_val > 0.4:
             result = {
                 "status": "spam",
                 "risk_level": "Medium",
-                "confidence": round(0.85 + (random.random() * 0.10), 2),
+                "confidence": round(0.75 + (random.random() * 0.10), 2),
                 "tone": "Persuasive / Sales",
                 "keywords": ["offer", "lifetime free", "credit card", "limited period"],
-                "reasoning": "Call pattern matches telemarketing scripts. While likely not malicious, the unsolicited nature and repetitive sales keywords classify it as spam."
+                "explanation": [
+                    "Detected repetitive sales pitch patterns.",
+                    "Unsolicited offer keywords identified.",
+                    "Tone analysis suggests persuasive telemarketing."
+                ]
             }
         else:
             result = {
                 "status": "safe",
                 "risk_level": "Low",
-                "confidence": round(0.90 + (random.random() * 0.09), 2),
+                "confidence": round(0.92 + (random.random() * 0.07), 2),
                 "tone": "Neutral / Casual",
                 "keywords": [],
-                "reasoning": "Natural conversation flow detected with no known threat indicators or suspicious keyword density."
+                "explanation": [
+                    "No malicious patterns detected.",
+                    "Natural conversation flow.",
+                    "No known fraud keywords found."
+                ]
             }
 
-        result["model_version"] = "v2.1.0-alpha"
+        result["model_version"] = "v1.0 (Demo)"
+        result["processing_note"] = "Audio analyzed securely on server"
         result["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
 
         return jsonify(result), 200

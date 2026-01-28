@@ -185,9 +185,16 @@ export function Result() {
                             <ShieldCheck className="w-5 h-5 text-brand-accent" />
                             Why was this call flagged?
                         </h3>
-                        <p className="text-brand-muted leading-relaxed text-lg">
-                            {result.reasoning || "No specific patterns were detected that indicate malicious intent. The call appears to be a standard conversation."}
-                        </p>
+                        <ul className="space-y-3">
+                            {result.explanation ? result.explanation.map((item, index) => (
+                                <li key={index} className="flex items-start gap-3 text-brand-muted text-lg leading-relaxed">
+                                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-brand-accent shrink-0" />
+                                    {item}
+                                </li>
+                            )) : (
+                                <li className="text-brand-muted">Analysis data unavailable.</li>
+                            )}
+                        </ul>
                     </Card>
                 </motion.div>
 

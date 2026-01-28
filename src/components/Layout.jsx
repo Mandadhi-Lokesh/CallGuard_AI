@@ -9,7 +9,13 @@ export function Layout({ children }) {
             </main>
             <footer className="border-t border-white/5 py-8 mt-auto bg-black/20">
                 <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-brand-muted">
-                    <p>© 2026 CallGuard AI. Protecting India.</p>
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-8 items-center">
+                        <p>© 2026 CallGuard AI</p>
+                        <p className="text-white/40 hidden md:block">|</p>
+                        <p>India AI Impact Buildathon</p>
+                        <p className="text-white/40 hidden md:block">|</p>
+                        <p>Team: CyberSentinels</p>
+                    </div>
 
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">

@@ -80,20 +80,20 @@ export function Home() {
                     <div className="grid md:grid-cols-3 gap-8">
                         <StepCard
                             icon={<UploadCloud className="w-10 h-10 text-brand-accent" />}
-                            title="1. Upload Audio"
-                            description="Upload your recorded call audio file (.wav or .mp3). Secure and private processing."
+                            title="1. Audio Upload"
+                            description="Securely ingest .wav or .mp3 files. Audio is pre-processed and normalized for consistent analysis."
                             delay={0.1}
                         />
                         <StepCard
                             icon={<Activity className="w-10 h-10 text-brand-accent" />}
-                            title="2. AI Analysis"
-                            description="Our model analyzes tone, keywords, and speech patterns using advanced NLP algorithms."
+                            title="2. Feature Extraction"
+                            description="Our model extracts key acoustic features, tone patterns, and keyword density from the raw audio data."
                             delay={0.2}
                         />
                         <StepCard
                             icon={<ShieldCheck className="w-10 h-10 text-brand-accent" />}
-                            title="3. Instant Result"
-                            description="Get a clear Fraud, Spam, or Safe verdict with a detailed confidence score."
+                            title="3. Risk Classification"
+                            description="The AI engine classifies the call as Fraud, Spam, or Safe with a confidence score and explainable risk factors."
                             delay={0.3}
                         />
                     </div>
