@@ -1,16 +1,47 @@
-# React + Vite
+# CallGuard AI - Intelligent Call Fraud Detection
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Protecting India's digital ecosystem from voice phishing and scam calls.**
 
-Currently, two official plugins are available:
+## Problem Statement
+Voice phishing (vishing) and spam calls are a massive issue in India, costing millions in financial losses annually. Vulnerable populations, especially senior citizens, are often targeted by sophisticated social engineering attacks that traditional blocklists cannot detect.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Solution
+**CallGuard AI** is a pro-active audio analysis system that detects fraud *content* and *intent*, not just blacklisted numbers. By analyzing speech patterns, urgency, and specific keywords, it provides a real-time risk assessment of recorded calls.
 
-## React Compiler
+## Architecture
+The application follows a clean, decoupled architecture:
+- **Frontend**: React (Vite) + Tailwind CSS (Dark Mode) + Framer Motion.
+    - Focuses on a premium, trustworthy user interface.
+- **Backend**: Python Flask REST API.
+    - Handles audio processing and ML inference simulation.
+    - Returns JSON responses with transparent confidence scores and explainability factors.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Technology Stack
+- **Frontend**: React, React Router, Lucide Icons, Axios/Fetch.
+- **Backend**: Flask, Flask-CORS, Python.
+- **Design**: "Cyber-Security" Dark Blue Theme, Glassmorphism.
 
-## Expanding the ESLint configuration
+## Demo Instructions
+1. **Clone the repository**.
+2. **Start the Backend**:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   python app.py
+   ```
+   *Server runs on http://localhost:5000*
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. **Start the Frontend**:
+   ```bash
+   npm install
+   npm run dev
+   ```
+   *Open http://localhost:5173*
+
+4. **Test the Flow**:
+   - Navigate to **Analyzer**.
+   - Upload an audio file (.wav/.mp3).
+   - View the detailed **Result** with explainability metrics.
+
+---
+*Disclaimer: This is a prototype system developed for educational and hackathon demonstration purposes. The analysis data is simulated.*

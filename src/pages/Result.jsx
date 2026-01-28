@@ -128,34 +128,66 @@ export function Result() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <Card className="h-full p-8 relative overflow-hidden">
+                    <Card className="h-full p-8 relative overflow-hidden flex flex-col justify-between">
                         <div className="absolute top-0 right-0 p-4 opacity-10">
                             <ScanFace className="w-24 h-24" />
                         </div>
-                        <h3 className="text-lg font-medium text-brand-muted mb-6">Analysis Details</h3>
+                        <div>
+                            <h3 className="text-lg font-medium text-brand-muted mb-6">Analysis Details</h3>
 
-                        <div className="space-y-6">
-                            <div>
-                                <div className="text-sm text-brand-muted mb-2">Detected Tone</div>
-                                <div className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white font-medium">
-                                    {result.tone}
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="text-sm text-brand-muted mb-2">Detected Tone</div>
+                                    <div className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white font-medium">
+                                        {result.tone}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div>
-                                <div className="text-sm text-brand-muted mb-2">Flagged Keywords</div>
-                                <div className="flex flex-wrap gap-2">
-                                    {result.keywords.map((keyword, i) => (
-                                        <span
-                                            key={i}
-                                            className="px-2 py-1 rounded-md bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-sm"
-                                        >
-                                            {keyword}
-                                        </span>
-                                    ))}
+                                <div>
+                                    <div className="text-sm text-brand-muted mb-2">Risk Level</div>
+                                    <div className={cn("inline-block px-3 py-1 rounded-full border font-medium", config.bgColor, config.borderColor, config.color)}>
+                                        {result.risk_level || 'Calculating...'}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="text-sm text-brand-muted mb-2">Flagged Keywords</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {result.keywords.length > 0 ? result.keywords.map((keyword, i) => (
+                                            <span
+                                                key={i}
+                                                className="px-2 py-1 rounded-md bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-sm"
+                                            >
+                                                {keyword}
+                                            </span>
+                                        )) : <span className="text-brand-muted italic">None detected</span>}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/5 text-xs text-brand-muted">
+                            <p>Model: {result.model_version || 'v1.0.0'}</p>
+                            <p>Analyzed: {result.timestamp || 'Just now'}</p>
+                        </div>
+                    </Card>
+                </motion.div>
+
+                {/* Explainability Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="md:col-span-2"
+                >
+                    <Card className="p-8 border-brand-primary/20 bg-brand-primary/5">
+                        <h3 className="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                            <ShieldCheck className="w-5 h-5 text-brand-accent" />
+                            Why was this call flagged?
+                        </h3>
+                        <p className="text-brand-muted leading-relaxed text-lg">
+                            {result.reasoning || "No specific patterns were detected that indicate malicious intent. The call appears to be a standard conversation."}
+                        </p>
                     </Card>
                 </motion.div>
 
@@ -168,7 +200,6 @@ export function Result() {
                         <RefreshCw className="w-4 h-4" /> Analyze Another Call
                     </Button>
                 </div>
-
             </div>
         </div>
     );
