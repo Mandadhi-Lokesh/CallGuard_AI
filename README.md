@@ -7,13 +7,13 @@
 > **Problem Statement**  
 > India loses crores daily to voice phishing (vishing) and financial fraud calls. Senior citizens and non-tech-savvy users are particularly vulnerable to high-pressure tactics. Traditional blocklists fail against new numbers and VoIP calls.
 
-## 🚀 The Solution
+## 🚀 Proposed Solution
 **CallGuard AI** is an intelligent fraud detection system that analyzes the *content* and *intent* of a call, not just the phone number. 
 
 Using advanced NLP patterns, it detects:
 - **Urgency & Threats** ("Your account will be blocked", "Immediate payment")
 - **Suspicious Keywords** ("OTP", "Refund", "KYC Update")
-- **Socio-Linguistic Indicators** (Aggressive tone, repetitive persuation)
+- **Socio-Linguistic Indicators** (Aggressive tone, repetitive persuasion)
 
 ---
 
@@ -33,8 +33,17 @@ The system follows a decoupled, secure architecture designed for scalability.
 [ JSON Response: Label + Confidence + Explanation ]
 ```
 
+## 🧠 AI Detection Logic (High-Level)
+The system currently uses a rule-based and pattern-driven inference approach designed to approximate real-world AI decision-making behavior:
+- Keyword and phrase risk scoring
+- Urgency and threat detection
+- Aggregated confidence calculation
+- Risk categorization (High / Medium / Low)
+
+This design allows easy replacement with ML/DL models in future iterations.
+
 ## 🛠️ Technology Stack
-- **Frontend**: React (Vite), Tailwind CSS (Dark Theme), Framer Motion
+- **Frontend**: React (Vite), Tailwind CSS (Dark Theme)
 - **Backend**: Python, Flask, Flask-CORS
 - **Design**: "Cyber-Trust" aesthetic, dark mode optimized, mobile-responsive.
 
@@ -58,12 +67,32 @@ npm run dev
 ```
 *Open http://localhost:5173*
 
+## 🌐 Live Deployment
+Frontend and backend are deployed and publicly accessible:
+
+- **Live URL**: <PASTE YOUR DEPLOYED LINK HERE>
+
+The application is optimized for both desktop and mobile browsers.
+
 ## 📱 Demo Flow for Judges
-1. **Analyze**: Go to the "Analyzer" tab.
-2. **Upload**: Drop the provided sample audio file `scam_sample.mp3` (or any .wav).
-3. **Wait**: Observe the "Analyzing" state featuring secure processing.
-4. **Result**: View the **High Risk** verdict, confidence score, and bullet-point explanation of *why* it was flagged.
+1. Navigate to the **Analyzer** tab.
+2. Upload a call audio file (.mp3 or .wav).
+3. Observe the secure **Analyzing** state.
+4. View the risk verdict, confidence score, and explanation.
+5. (Optional) Upload an unsupported file to see graceful error handling.
+
+## 🇮🇳 Impact & Use Cases
+- Protecting senior citizens from voice phishing
+- Assisting telecom providers with fraud screening
+- Raising awareness about scam call patterns
+- Foundation for real-time call monitoring systems
+
+## 🔮 Future Scope
+- Integration with real-time call streams
+- Multilingual scam detection (regional Indian languages)
+- ML/DL model replacement for heuristic logic
+- Telecom and banking system integration
 
 ---
 
-*Disclaimer: This project is a prototype developed for the India AI Impact Buildathon. Analysis logic is simulated for demonstration purposes.*
+*Disclaimer: This project is a functional prototype built for the India AI Impact Buildathon. The system demonstrates the feasibility of AI-assisted call fraud detection using heuristic and pattern-based inference.*

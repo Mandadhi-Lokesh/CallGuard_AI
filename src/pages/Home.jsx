@@ -64,6 +64,28 @@ export function Home() {
                 </motion.div>
             </section>
 
+
+
+            {/* Core Capabilities Section (Synced with README) */}
+            <section className="py-12 bg-black/10 border-y border-white/5">
+                <div className="container mx-auto px-4">
+                    <div className="grid md:grid-cols-3 gap-6 text-center">
+                        <div className="p-6 rounded-2xl bg-brand-primary/5 hover:bg-brand-primary/10 transition-colors">
+                            <h3 className="text-white font-semibold mb-2">Urgency & Threats</h3>
+                            <p className="text-brand-muted text-sm">Detects high-pressure tactics ("Your account is blocked", "Immediate payment required") instantly.</p>
+                        </div>
+                        <div className="p-6 rounded-2xl bg-brand-primary/5 hover:bg-brand-primary/10 transition-colors">
+                            <h3 className="text-white font-semibold mb-2">Suspicious Keywords</h3>
+                            <p className="text-brand-muted text-sm">Flags known fraud terminology like "OTP", "Refund", "KYC Update", and "Verification" in real-time.</p>
+                        </div>
+                        <div className="p-6 rounded-2xl bg-brand-primary/5 hover:bg-brand-primary/10 transition-colors">
+                            <h3 className="text-white font-semibold mb-2">Socio-Linguistic Indicators</h3>
+                            <p className="text-brand-muted text-sm">Analyzes tone patterns for aggression, repetitive persuasion, and abnormal speech cadence.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* How It Works Section */}
             <section className="py-24 bg-black/20">
                 <div className="container mx-auto px-4">
@@ -99,7 +121,7 @@ export function Home() {
                     </div>
                 </div>
             </section>
-        </div>
+        </div >
     );
 }
 

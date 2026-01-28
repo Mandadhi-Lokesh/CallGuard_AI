@@ -29,6 +29,12 @@ export function Layout({ children }) {
                         </div>
                     </div>
                 </div>
+
+                <div className="mt-8 pt-4 border-t border-white/5 text-center px-4">
+                    <p className="text-xs text-brand-muted/40">
+                        Disclaimer: This project is a functional prototype built for the India AI Impact Buildathon. The system demonstrates the feasibility of AI-assisted call fraud detection using heuristic and pattern-based inference.
+                    </p>
+                </div>
             </footer>
         </div>
     );

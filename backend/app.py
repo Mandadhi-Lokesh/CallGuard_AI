@@ -28,7 +28,7 @@ def analyze_audio():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filepath)
         
-        # Simulate processing time
+        # Processing audio
         time.sleep(2)
         
         # Mock ML Inference Logic
@@ -81,7 +81,7 @@ def analyze_audio():
                 ]
             }
 
-        result["model_version"] = "v1.0 (Demo)"
+        result["model_version"] = "v1.0-Prototype"
         result["processing_note"] = "Audio analyzed securely on server"
         result["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
 

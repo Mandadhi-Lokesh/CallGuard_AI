@@ -1,6 +1,6 @@
 import { Card } from '../components/Card';
 import { motion } from 'framer-motion';
-import { HeartHandshake, Building2, Smartphone, Shield, Users, Lock } from 'lucide-react';
+import { ArrowDown, HeartHandshake, Building2, Smartphone, Shield, Users, Lock } from 'lucide-react';
 
 export function About() {
     const impacts = [
@@ -71,6 +71,55 @@ export function About() {
                 ))}
             </div>
 
+
+
+            <section className="mt-24 mb-24">
+                <h2 className="text-3xl font-bold mb-8 text-center text-white">Our Technology</h2>
+                <div className="bg-brand-card/50 border border-white/5 rounded-3xl p-8 md:p-12">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 className="text-2xl font-bold mb-4 text-white">AI Detection Logic</h3>
+                            <p className="text-brand-muted mb-6 text-lg">
+                                The system currently uses a rule-based and pattern-driven inference approach designed to approximate real-world AI decision-making behavior:
+                            </p>
+                            <ul className="space-y-4">
+                                {[
+                                    "Keyword and phrase risk scoring",
+                                    "Urgency and threat detection",
+                                    "Aggregated confidence calculation",
+                                    "Risk categorization (High / Medium / Low)"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-brand-muted">
+                                        <span className="w-2 h-2 rounded-full bg-brand-accent"></span>
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="bg-black/40 rounded-2xl p-6 border border-white/5 font-mono text-sm text-brand-accent/80">
+                            <div className="mb-2 text-brand-muted/50 border-b border-white/5 pb-2">Analysis Pipeline</div>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white">1. Input:</span> Raw Audio (.wav/.mp3)
+                                </div>
+                                <div className="flex justify-center"><ArrowDown className="w-4 h-4 opacity-50" /></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white">2. Process:</span> Feature Extraction
+                                </div>
+                                <div className="flex justify-center"><ArrowDown className="w-4 h-4 opacity-50" /></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white">3. Logic:</span> Inference Engine
+                                </div>
+                                <div className="flex justify-center"><ArrowDown className="w-4 h-4 opacity-50" /></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white">4. Output:</span> JSON Risk Profile
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section className="mt-24 text-center">
                 <div className="p-12 rounded-3xl bg-gradient-to-b from-brand-card to-transparent border border-white/5">
                     <h2 className="text-3xl font-bold mb-6">Why It Matters</h2>
@@ -81,7 +130,60 @@ export function About() {
                     </div>
                 </div>
             </section>
-        </div>
+
+            <section className="mt-24">
+                <h2 className="text-3xl font-bold mb-8 text-center text-white">Future Scope</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                    <Card className="p-6 border-brand-primary/20 bg-brand-primary/5">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-brand-accent/10 rounded-lg text-brand-accent">
+                                <Smartphone className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-semibold mb-2 text-white">Real-Time Call Integration</h3>
+                                <p className="text-brand-muted">Integrating with Android/iOS dialers (via API) to provide live warnings as the call happens, not just post-call analysis.</p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="p-6 border-brand-primary/20 bg-brand-primary/5">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-brand-accent/10 rounded-lg text-brand-accent">
+                                <Building2 className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-semibold mb-2 text-white">Multilingual Support</h3>
+                                <p className="text-brand-muted">Expanding our NLP models to support Hindi, Tamil, Telugu, and other regional Indian languages for deeper penetration.</p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="p-6 border-brand-primary/20 bg-brand-primary/5">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-brand-accent/10 rounded-lg text-brand-accent">
+                                <Shield className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-semibold mb-2 text-white">Advanced ML Models</h3>
+                                <p className="text-brand-muted">Replacing current heuristic logic with Transformer-based models (BERT/Whisper) for higher nuance detection.</p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="p-6 border-brand-primary/20 bg-brand-primary/5">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-brand-accent/10 rounded-lg text-brand-accent">
+                                <HeartHandshake className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-semibold mb-2 text-white">Telecom Partnership</h3>
+                                <p className="text-brand-muted">API-level integration with major telecom providers to screen calls at the network level before they reach the user.</p>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            </section>
+        </div >
     );
 }
 
