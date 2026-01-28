@@ -15,34 +15,27 @@ export function Analyzer() {
 
         setIsAnalyzing(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            setIsAnalyzing(false);
-            // Navigate to result with mock data
-            // In a real app, we would pass the ID or data
-            const mockResult = {
-                status: 'fraud', // fraud, spam, safe
-                confidence: 0.98,
-                keywords: ['bank account', 'verify', 'otp', 'urgent', 'block'],
-                tone: 'Aggressive',
-                fileName: file.name
-            };
-            // Randomize result for demo purposes
-            const rand = Math.random();
-            if (rand > 0.6) {
-                mockResult.status = 'safe';
-                mockResult.confidence = 0.92;
-                mockResult.keywords = ['delivery', 'package', 'gate'];
-                mockResult.tone = 'Neutral';
-            } else if (rand > 0.3) {
-                mockResult.status = 'spam';
-                mockResult.confidence = 0.85;
-                mockResult.keywords = ['loan', 'offer', 'credit card'];
-                mockResult.tone = 'Persuasive';
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('http://localhost:5000/analyze', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Analysis failed');
             }
 
-            navigate('/result', { state: { result: mockResult } });
-        }, 3000); // 3 seconds delay
+            const data = await response.json();
+            navigate('/result', { state: { result: data } });
+        } catch (error) {
+            console.error('Error analyzing file:', error);
+            alert('Failed to analyze audio. Please ensure the backend server is running.');
+        } finally {
+            setIsAnalyzing(false);
+        }
     };
 
     return (
