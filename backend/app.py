@@ -28,63 +28,97 @@ def analyze_audio():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filepath)
         
-        # Processing audio
-        time.sleep(2)
+        # Log incoming request details (User requirement)
+        print(f"Received file: {file.filename}")
+        print(f"File size: {os.path.getsize(filepath)} bytes")
         
-        # Mock ML Inference Logic
-        # In a real app, this would be: model.predict(filepath)
+        robustness_mode = request.form.get('robustness', 'false').lower() == 'true'
+
         
-        # Deterministic but seemingly random logic based on filename length
-        # to ensure the same file gets the same result during demo
-        seed = len(file.filename)
-        random.seed(seed)
+        # Feature Extraction
+        import io
+        import detector
+        import feature_extraction
+        import audio_utils
+
+        # Open file
+        with open(filepath, 'rb') as f:
+            wav_bytes = f.read()
+            wav_io = io.BytesIO(wav_bytes)
+
+        if robustness_mode:
+            wav_io = audio_utils.apply_noise(wav_io)
+
+        signals, y, sr = feature_extraction.extract_features(wav_io)
+        duration = len(y) / sr
         
-        rand_val = random.random()
+        # Detection
+        detection_result = detector.detect_ai(signals)
         
-        if rand_val > 0.7:
-            result = {
-                "status": "fraud",
-                "risk_level": "High",
-                "confidence": round(0.87 + (random.random() * 0.12), 2),
-                "tone": "Aggressive / Urgent",
-                "keywords": ["verify", "immediate action", "block", "otp"],
-                "explanation": [
-                    "Detected high-urgency phrases demanding immediate action.",
-                    "Frequent use of banking-related keywords (OTP, Block).",
-                    "Abnormal speech cadence indicating scripted threats."
-                ]
-            }
-        elif rand_val > 0.4:
-            result = {
-                "status": "spam",
-                "risk_level": "Medium",
-                "confidence": round(0.75 + (random.random() * 0.10), 2),
-                "tone": "Persuasive / Sales",
-                "keywords": ["offer", "lifetime free", "credit card", "limited period"],
-                "explanation": [
-                    "Detected repetitive sales pitch patterns.",
-                    "Unsolicited offer keywords identified.",
-                    "Tone analysis suggests persuasive telemarketing."
-                ]
-            }
+        # Chunk Analysis
+        chunk_feats = feature_extraction.extract_chunk_features(y, sr)
+        chunk_analysis = detector.aggregate_chunk_scores(chunk_feats)
+        
+        # Warnings
+        warnings = detector.generate_warnings(signals, duration)
+
+        # Aggregated Evidence Score Calculation
+        score_breakdown = detection_result.get("score_breakdown", {"pitch":0,"timing":0,"spectral":0})
+        robustness_score = 4 if robustness_mode else 0
+
+        # New Additive Confidence Logic (Base 55)
+        base_confidence = 55
+        
+        additive_boost = (
+            score_breakdown.get("pitch", 0) + 
+            score_breakdown.get("timing", 0) + 
+            score_breakdown.get("spectral", 0) + 
+            chunk_analysis.get("stability_score", 0) + 
+            robustness_score
+        )
+        
+        total_score = base_confidence + additive_boost
+        final_confidence = min(total_score, 90) / 100.0
+        
+        # Determine Label 
+        # > 75% -> Synthetic Voice Signature (High)
+        # 55-75% -> Mixed Acoustic Signals (Medium)
+        
+        if final_confidence > 0.75:
+            display_status = "fraud"
+            risk_level = "High"
+        elif final_confidence >= 0.55:
+            display_status = "spam"
+            risk_level = "Medium"
         else:
-            result = {
-                "status": "safe",
-                "risk_level": "Low",
-                "confidence": round(0.92 + (random.random() * 0.07), 2),
-                "tone": "Neutral / Casual",
-                "keywords": [],
-                "explanation": [
-                    "No malicious patterns detected.",
-                    "Natural conversation flow.",
-                    "No known fraud keywords found."
-                ]
-            }
+            display_status = "safe"
+            risk_level = "Low"
+            
+        # Overrule if absolutely no evidence found
+        if additive_boost < 4:
+             display_status = "safe"
+             risk_level = "Low"
 
-        result["model_version"] = "v1.0-Prototype"
-        result["processing_note"] = "Audio analyzed securely on server"
-        result["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-
+        # Construct Response
+        result = {
+            "status": display_status,
+            "risk_level": risk_level,
+            "confidence": round(final_confidence, 2),
+            "evidence_score": {
+                "pitch": score_breakdown.get("pitch", 0),
+                "timing": score_breakdown.get("timing", 0),
+                "spectral": score_breakdown.get("spectral", 0),
+                "chunk_stability": chunk_analysis.get("stability_score", 0),
+                "robustness": robustness_score
+            },
+            "explanation": detection_result["explanation"],
+            "warnings": warnings,
+            "signals": signals,
+            "chunk_analysis": chunk_analysis,
+            "robustness_applied": robustness_mode,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
         return jsonify(result), 200
 
     return jsonify({'error': 'Unknown error'}), 500

@@ -18,21 +18,24 @@ export function Analyzer() {
         try {
             const formData = new FormData();
             formData.append('file', file);
+            formData.append('language', 'English'); // Default or get from UI
 
             const response = await fetch('http://localhost:5000/analyze', {
                 method: 'POST',
-                body: formData,
+                body: formData, // No headers needed for multipart/form-data
             });
 
             if (!response.ok) {
-                throw new Error('Analysis failed');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Server error ${response.status}`);
             }
 
             const data = await response.json();
             navigate('/result', { state: { result: data } });
+
         } catch (error) {
             console.error('Error analyzing file:', error);
-            alert('Failed to analyze audio. Please ensure the backend server is running.');
+            alert(`Failed to analyze audio: ${error.message}`);
         } finally {
             setIsAnalyzing(false);
         }
