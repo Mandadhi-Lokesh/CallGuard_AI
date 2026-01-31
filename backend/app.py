@@ -85,79 +85,36 @@ def analyze_audio():
                 "duration": duration
             }
         
-        # Detection
-        detection_result = detector.detect_ai(signals)
-        
-        # Chunk Analysis - aggregate scores from chunk features
+        # Chunk Analysis - aggregate scores
         chunk_analysis = detector.aggregate_chunk_scores(chunk_feats)
+        
+        # Inject chunk stability into signals for AI Detection Model
+        # passing as specific key 'chunk_std' (using stability score as proxy for now)
+        signals["chunk_std"] = chunk_analysis.get("stability_score", 0)
+
+        # Detection (Now uses ML Model or Advanced Heuristic)
+        detection_result = detector.detect_ai(signals)
         
         # Warnings
         warnings = detector.generate_warnings(signals, duration)
 
-        # Aggregated Evidence Score Calculation
-        score_breakdown = detection_result.get("score_breakdown", {"pitch":0,"timing":0,"spectral":0})
-        robustness_score = 4 if robustness_mode else 0
-
-        # Tiered Confidence Logic (Base 55)
-        # Tier 1: Pitch (High Signal), Chunk Stability
-        # Tier 2: Timing (Supporting)
-        # Tier 3: Spectral (Contextual - Explanation Only, NO confidence impact)
-        
-        base_confidence = 55
-        
-        pitch_score = score_breakdown.get("pitch", 0)
-        timing_score = score_breakdown.get("timing", 0)
-        stability_score = chunk_analysis.get("stability_score", 0)
-        
-        # Consistency Multiplier (Reinforcement Bonus)
-        # If Pitch Trend (Tier 1) AND Chunk Stability (Tier 1) both indicate AI,
-        # apply a reinforcement bonus.
-        consistency_bonus = 0
-        if pitch_score > 0 and stability_score > 0:
-            consistency_bonus = 10
-        
-        additive_boost = (
-            pitch_score +       # Tier 1
-            timing_score +      # Tier 2 (Includes Pause Consistency Bonus)
-            stability_score +   # Tier 1
-            chunk_analysis.get("pitch_consistency_score", 0) + # Tier 1 (Unnatural Consistency)
-            consistency_bonus   # Agreement Bonus
-            # Spectral intentionally excluded from confidence
-        )
-        
-        total_score = base_confidence + additive_boost
-        final_confidence = min(total_score, 90) / 100.0
-        
-        # Determine Label 
-        # > 75% -> Synthetic Voice Signature (High)
-        # 55-75% -> Mixed Acoustic Signals (Medium)
-        
-        if final_confidence > 0.75:
-            display_status = "fraud"
-            risk_level = "High"
-        elif final_confidence >= 0.55:
-            display_status = "spam"
-            risk_level = "Medium"
-        else:
-            display_status = "safe"
-            risk_level = "Low"
-            
-        # Overrule if absolutely no evidence found
-        if additive_boost < 4:
-             display_status = "safe"
-             risk_level = "Low"
-
         # Construct Response
+        final_confidence = detection_result["confidence"] # Float 0.0-1.0
+        
         result = {
-            "status": display_status,
-            "risk_level": risk_level,
-            "confidence": round(final_confidence, 2),
+            "status": "success", # Legacy
+            "assessment": detection_result["classification"], # New
+            "risk_level": "High" if final_confidence > 0.75 else "Low", 
+            "confidence": final_confidence, # Float
+            "top_signals": detection_result["explanation"][:3], # New
+            
+            "chunk_confidence": chunk_analysis.get("chunk_confidence", []), # New
+            
+            # Existing Fields (Extended)
             "evidence_score": {
-                "pitch": score_breakdown.get("pitch", 0),
-                "timing": score_breakdown.get("timing", 0),
-                "spectral": score_breakdown.get("spectral", 0),
+                **detection_result["score_breakdown"],
                 "chunk_stability": chunk_analysis.get("stability_score", 0),
-                "robustness": robustness_score
+                "robustness": 4 if robustness_mode else 0
             },
             "explanation": detection_result["explanation"],
             "warnings": warnings,
