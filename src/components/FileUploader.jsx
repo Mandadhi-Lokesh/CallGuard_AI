@@ -34,12 +34,9 @@ export function FileUploader({ onFileSelect }) {
     };
 
     const handleFile = (file) => {
-        if (file.type.startsWith('audio/') || file.name.endsWith('.wav') || file.name.endsWith('.mp3')) {
-            setSelectedFile(file);
-            onFileSelect(file);
-        } else {
-            alert("Please upload an audio file (.mp3 or .wav)");
-        }
+        // Relaxed check: Accept any file, let backend handle/validate
+        setSelectedFile(file);
+        onFileSelect(file);
     };
 
     const removeFile = () => {
@@ -72,7 +69,6 @@ export function FileUploader({ onFileSelect }) {
                             <input
                                 type="file"
                                 className="hidden"
-                                accept="audio/*,.wav,.mp3"
                                 onChange={handleChange}
                             />
 
@@ -88,7 +84,7 @@ export function FileUploader({ onFileSelect }) {
                                         Drop your audio file here
                                     </p>
                                     <p className="text-sm">
-                                        or click to browse (.wav, .mp3)
+                                        or click to browse
                                     </p>
                                 </div>
                             </div>
@@ -99,7 +95,7 @@ export function FileUploader({ onFileSelect }) {
                             </div>
                         </label>
                         <div className="mt-4 text-center">
-                            <p className="text-xs text-brand-muted/60">Supported formats: .wav, .mp3 (Max 10MB)</p>
+                            <p className="text-xs text-brand-muted/60">Supported formats: All audio formats (wav, mp3, m4a, ogg, flac, etc.)</p>
                             <p className="text-xs text-brand-muted/40 mt-1 flex items-center justify-center gap-1">
                                 <span className="w-1.5 h-1.5 bg-brand-success/50 rounded-full"></span>
                                 Audio is processed securely on-server and not stored.

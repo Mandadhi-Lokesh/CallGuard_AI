@@ -1,12 +1,10 @@
-from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional
-import io
-from pydub import AudioSegment
+from typing import Optional, List
+import os
 
-# remove decode_base64_mp3 as we don't need it for direct upload
-# from audio_utils import decode_base64_mp3
+
 from feature_extraction import extract_features
 from detector import detect_ai
 
@@ -30,16 +28,21 @@ API_KEY_SECRET = "sk_test_123456789"  # In production, use env vars
 
 # --- Models ---
 class VoiceDetectionRequest(BaseModel):
-    language: str = Field(..., description="Tamil, English, Hindi, Malayalam, or Telugu")
-    audioFormat: str = Field(..., pattern="^mp3$", description="Must be 'mp3'")
-    audioBase64: str = Field(..., description="Base64 encoded MP3 audio")
+    # Language is now optional/informational
+    language: Optional[str] = Field(None, description="Optional: Tamil, English, Hindi, Malayalam, Telugu, etc.")
+    # Relaxed format restriction
+    audioFormat: str = Field(..., description="wav, mp3, m4a, ogg, etc.")
+    audioBase64: str = Field(..., description="Base64 encoded audio")
+
+class VoiceDetectionMetadata(BaseModel):
+    audio_format: str
+    language: str
 
 class VoiceDetectionResponse(BaseModel):
     status: str
-    language: str
-    classification: str
-    confidenceScore: float
-    explanation: str
+    confidence: int
+    classified_based_on: List[str]
+    metadata: VoiceDetectionMetadata
 
 # --- Dependencies ---
 async def verify_api_key(x_api_key: str = Header(...)):
@@ -48,74 +51,46 @@ async def verify_api_key(x_api_key: str = Header(...)):
     return x_api_key
 
 # --- Endpoints ---
-# --- Endpoints ---
 @app.post("/api/voice-detection", response_model=VoiceDetectionResponse)
-async def detect_voice(
-    file: UploadFile = File(...),
-    language: str = Form(...),
+def detect_voice(
+    request: VoiceDetectionRequest,
     api_key: str = Depends(verify_api_key)
 ):
+    temp_wav_path = None
     try:
-        # Log reception
-        print(f"Received file: {file.filename}, Size: {file.size} bytes, Content-Type: {file.content_type}")
-
-        # Validate file type
-        if not file.filename.lower().endswith(('.mp3', '.wav')):
-             raise HTTPException(status_code=400, detail="Only .mp3 and .wav files are supported")
-
-        # Read file
-        audio_bytes = await file.read()
+        # 1. Load ANY audio format (Universal Loader)
+        from audio_utils import load_audio_any_format
+        temp_wav_path = load_audio_any_format(request.audioBase64, format_hint=request.audioFormat)
         
-        # Create BytesIO object for compatibility with existing utils
-        import io
-        wav_io = io.BytesIO(audio_bytes)
-        # Note: If existing utils specifically expect mp3 bytes to be decoded, 
-        # we might need to adjust, but let's assume they handle the stream or bytes.
-        # Looking at original code: decode_base64_mp3 returned a wav_io. 
-        # We need to see if we need to decode MP3 to WAV here.
-        # If the uploaded file IS mp3, we might need to convert it to WAV if extract_features expects WAV.
+        # 2. Extract features
+        features = extract_features(temp_wav_path)
         
-        # Let's inspect imports to be sure, but for now assuming we plug into existing flow.
-        # Ideally we replace decode_base64_mp3 with a direct conversion if needed.
-        # But wait, the previous code called `decode_base64_mp3`.
-        # I'll stick to a safe path: if it's MP3, convert to WAV.
-        
-        from pydub import AudioSegment
-        try:
-            if file.filename.lower().endswith('.mp3'):
-                audio = AudioSegment.from_mp3(io.BytesIO(audio_bytes))
-                wav_io = io.BytesIO()
-                audio.export(wav_io, format="wav")
-                wav_io.seek(0)
-            else:
-                 # Assume WAV
-                wav_io = io.BytesIO(audio_bytes)
-        except Exception as conversion_err:
-             print(f"Conversion error: {conversion_err}")
-             # Fallback or re-raise
-             raise HTTPException(status_code=400, detail="Invalid audio file format")
-
-        
-        # Extract features
-        features = extract_features(wav_io)
-        
-        # Detect
+        # 3. Detect
         result = detect_ai(features)
         
         return {
-            "status": "success",
-            "language": language,
-            "classification": result["classification"],
-            "confidenceScore": result["confidence"],
-            "explanation": result["explanation"]
+            "status": result["status"],
+            "confidence": result["confidence"],
+            "classified_based_on": result["classified_based_on"],
+            "metadata": {
+                "audio_format": request.audioFormat,
+                "language": "multi-language supported"
+            }
         }
 
     except ValueError as e:
-        # Client error (e.g. invalid audio format)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         print(f"Server Error: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=500,
             detail="Internal audio processing error"
         )
+    finally:
+        if temp_wav_path and os.path.exists(temp_wav_path):
+            try:
+                os.remove(temp_wav_path)
+            except:
+                pass

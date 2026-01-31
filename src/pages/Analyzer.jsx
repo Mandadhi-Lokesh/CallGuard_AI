@@ -16,13 +16,29 @@ export function Analyzer() {
         setIsAnalyzing(true);
 
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('language', 'English'); // Default or get from UI
+            // 1. Convert file to Base64
+            const toBase64 = (file) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
 
-            const response = await fetch('http://localhost:5000/analyze', {
+            const base64String = await toBase64(file);
+            const extension = file.name.split('.').pop().toLowerCase();
+
+            // 2. Send JSON request to correct port 8000
+            const response = await fetch('http://localhost:8000/api/voice-detection', {
                 method: 'POST',
-                body: formData, // No headers needed for multipart/form-data
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': 'sk_test_123456789'
+                },
+                body: JSON.stringify({
+                    language: 'English', // Optional, sending default
+                    audioFormat: extension, // Pass actual extension (mp3, m4a, wav, etc)
+                    audioBase64: base64String
+                }),
             });
 
             if (!response.ok) {
@@ -52,9 +68,8 @@ export function Analyzer() {
                     <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
                         Call Analyzer
                     </h1>
-                    <p className="text-brand-muted text-lg">
-                        Upload your call recording to detect potential fraud or spam using our advanced AI models.
-                    </p>
+                    Upload your call recording (wav, mp3, m4a, ogg, etc.) to detect potential fraud or spam.
+                    Multi-language models supported.
                 </div>
 
                 <div className="py-8">

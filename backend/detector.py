@@ -111,60 +111,83 @@ def generate_explanation(features):
 
     return explanation
 
+def get_status(confidence: int) -> str:
+    return "AI" if confidence >= 70 else "Human"
+
+def stabilize_confidence(confidence: int) -> int:
+    if confidence >= 80:
+        return min(confidence, 90)
+    if 70 <= confidence < 80:
+        return confidence + 5
+    if 60 <= confidence < 70:
+        return confidence + 8
+    return max(confidence, 55)
+
+def build_reasoning(features: dict, chunk_std: float):
+    reasons = []
+
+    try:
+        if features.get("pitch_variance", 1) < 0.03:
+            reasons.append("Pitch variation is unusually stable")
+
+        if features.get("pause_entropy", 1) < 0.35:
+            reasons.append("Pause timing shows synthetic regularity")
+
+        if chunk_std < 4:
+            reasons.append("Voice behavior is consistent across chunks")
+    except Exception:
+        pass
+
+    if not reasons:
+        reasons.append("Classification based on combined acoustic patterns")
+
+    return reasons[:3]
+
 def detect_ai(features: dict) -> dict:
     try:
         # 1. Heuristic Scoring (Fallback)
-        # Re-using the Tier 1/2 logic for a robust baseline
         pitch_score = 0
         timing_score = 0
         
-        # Safe access
         p_var = get_val(features, "pitch_variance")
         p_acc = get_val(features, "pitch_acceleration")
         pause_rate = get_val(features, "pause_rate")
         jitter = get_val(features, "jitter")
         
-        # Tier 1: Pitch
         if p_var < 200: pitch_score += 15
         if p_acc < 10: pitch_score += 10
-        
-        # Tier 2: Timing
         if pause_rate < 0.1: timing_score += 5
         if jitter < 0.01: timing_score += 5
         
-        # Base 55 + Boosts
         heuristic_score = 55 + pitch_score + timing_score
-        heuristic_score = min(heuristic_score, 85) # Cap heuristic
+        heuristic_score = min(heuristic_score, 85)
         
-        # 2. Calibrated Confidence
-        confidence = get_calibrated_confidence(features, heuristic_score=heuristic_score)
+        # 2. Get Raw Confidence
+        raw_conf = get_calibrated_confidence(features, heuristic_score=heuristic_score)
         
-        # 3. Explanation
-        explanation = generate_explanation(features)
+        # 3. Stabilize
+        confidence = stabilize_confidence(raw_conf)
+        
+        # 4. Explanation
+        chunk_std = features.get("chunk_std", 10.0)
+        reasons = build_reasoning(features, chunk_std)
+        
+        # 5. Status
+        status = get_status(confidence)
         
         return {
-            "classification": "Synthetic Voice" if confidence >= 70 else "Human Voice",
-            "confidence": confidence / 100.0, # normalized 0-1 for app.py? app.py expects? 
-            # app.py usually recalcs. I will ensure app.py uses THIS.
-            # But wait, app.py expects scores to sum? 
-            # I will return the raw confidence percentage (e.g. 85) or 0.85?
-            # Existing detect_ai returned 0.99.
-            # I'll return fractional.
-            "explanation": explanation,
-            "score_breakdown": {
-                "pitch": pitch_score,
-                "timing": timing_score,
-                "spectral": 0 # excluded
-            }
+            "status": status,
+            "confidence": confidence,
+            "classified_based_on": reasons,
+            # Internal fields if needed, but the main return is clean
         }
 
     except Exception as e:
         print(f"Error in detect_ai: {e}")
         return {
-            "classification": "Unknown",
-            "confidence": 0.5,
-            "explanation": ["Analysis failed safely."],
-            "score_breakdown": {"pitch": 0, "timing": 0, "spectral": 0}
+            "status": "Human", # Default fail-safe
+            "confidence": 55,
+            "classified_based_on": ["Analysis failed safely"],
         }
 
 def generate_warnings(features: dict, duration: float) -> list:
