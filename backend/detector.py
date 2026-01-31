@@ -58,7 +58,19 @@ def detect_ai(features: dict) -> dict:
         
         spectral_score = min(spectral_score, 12)
         
-        # Internal confidence calculation (Legacy support, app.py recalculates)
+        # Unnatural Consistency Checks
+        # Pause Consistency (Tier 2 - Supporting)
+        pause_irregularity = get_val("pause_irregularity", default=None)
+        if pause_irregularity is not None and pause_irregularity < 0.2:
+            timing_score += 4
+            reasons.append("Pause lengths are unnaturally repetitive (Mechanical rhythm).")
+            
+        timing_score = min(timing_score, 12)
+
+        # Spectral Consistency (Tier 3 - Contextual/Explanation Only)
+        harmonic_consistency = get_val("harmonic_consistency", default=0)
+        if harmonic_consistency > 10.0:
+             reasons.append("Spectral envelope variance is near-zero (Hyper-consistent).")
         total_evidence = pitch_score + timing_score + spectral_score
         confidence = min(total_evidence / 36.0, 0.99) # Approx normalized
 
@@ -127,30 +139,61 @@ def aggregate_chunk_scores(chunk_features: list) -> dict:
         
     scores = [c["confidence"] for c in chunk_results]
     
-    # Stability Score Calculation (Additive Max 12)
+    # Trend Analysis (Patterns > Values)
+    # Measure stability using Standard Deviation
     avg_score = sum(scores) / len(scores)
-    variance = max(scores) - min(scores)
+    
+    # Calculate Std Dev
+    variance_sum = sum((x - avg_score) ** 2 for x in scores)
+    std_dev = (variance_sum / len(scores)) ** 0.5
     
     stability_score = 0
     trend = "natural_or_mixed"
 
+    # Logic: 
+    # Flat pitch/score over time = strong AI signal (Low Std Dev)
+    # Slightly noisy/drift = human signal (High Std Dev)
+    
     if avg_score > 0.6:
-        # High confidence base
-        if variance < 0.2:
-            stability_score = 12 # Consistent AI
+        # Detected AI-like features are present relative to threshold
+        if std_dev < 0.1:
+            # Very stable -> Digital Consistency
+            stability_score = 12 
             trend = "stable_synthetic"
+        elif std_dev < 0.15:
+            # Somewhat stable
+            stability_score = 8
+            trend = "mostly_stable"
         else:
-            stability_score = 8 # Fluctuating AI
-            trend = "fluctuating_synthetic"
+            # High fluctuation -> Human irregularity
+            stability_score = 0
+            trend = "fluctuating_human_like"
     else:
-        # Natural or low conf
+        # Low confidence generally -> Human
         stability_score = 0
         trend = "natural_low_conf"
+    
+    # Pitch Variance Consistency (Tier 1 - High Value)
+    # Check if pitch VARIANCE itself is too stable across chunks (Robotic consistency)
+    pitch_vars = [feat.get("pitch_variance", 0) for feat in chunk_features]
+    if pitch_vars and len(pitch_vars) > 1 and sum(pitch_vars) > 0:
+        avg_pval = sum(pitch_vars) / len(pitch_vars)
+        pvar_sum = sum((x - avg_pval) ** 2 for x in pitch_vars)
+        pvar_std = (pvar_sum / len(pitch_vars)) ** 0.5
+        
+        # If variance is highly consistent (Low Std Dev of Variance)
+        if pvar_std < 5.0:
+            pitch_consistency_score = 8
+        else:
+            pitch_consistency_score = 0
+    else:
+        pitch_consistency_score = 0
         
     return {
         "trend": trend,
         "average_confidence": round(avg_score, 2),
         "chunk_details": chunk_results,
         "chunk_confidence": [int(s * 100) for s in scores],
-        "stability_score": stability_score
+        "stability_score": stability_score,
+        "pitch_consistency_score": pitch_consistency_score
     }

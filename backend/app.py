@@ -4,6 +4,8 @@ import random
 import time
 import os
 
+import hashlib
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
 
@@ -12,6 +14,9 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# In-memory Cache for Extracted Features
+FEATURE_CACHE = {}
 
 @app.route('/analyze', methods=['POST'])
 def analyze_audio():
@@ -41,22 +46,49 @@ def analyze_audio():
         import feature_extraction
         import audio_utils
 
-        # Open file
+        # Caching Logic
+        # Read file to compute hash
         with open(filepath, 'rb') as f:
-            wav_bytes = f.read()
-            wav_io = io.BytesIO(wav_bytes)
+            file_content = f.read()
+        
+        file_hash = hashlib.sha256(file_content).hexdigest()
+        cache_key = file_hash
 
-        if robustness_mode:
-            wav_io = audio_utils.apply_noise(wav_io)
+        # Check Cache
+        cached_data = FEATURE_CACHE.get(cache_key)
+        
+        if cached_data:
+            print(f"Cache Hit for {file_hash[:8]}... (robustness_mode={robustness_mode})")
+            signals = cached_data["signals"]
+            chunk_feats = cached_data["chunk_features"]
+            duration = cached_data["duration"]
+        else:
+            print(f"Cache Miss for {file_hash[:8]}... (robustness_mode={robustness_mode}) Extracting features.")
+            # Open file
+            with open(filepath, 'rb') as f:
+                wav_bytes = f.read()
+                wav_io = io.BytesIO(wav_bytes)
 
-        signals, y, sr = feature_extraction.extract_features(wav_io)
-        duration = len(y) / sr
+            if robustness_mode:
+                wav_io = audio_utils.apply_noise(wav_io)
+
+            signals, y, sr = feature_extraction.extract_features(wav_io)
+            duration = len(y) / sr
+            
+            # Chunk Analysis - extract features for chunks
+            chunk_feats = feature_extraction.extract_chunk_features(y, sr)
+
+            # Store in Cache
+            FEATURE_CACHE[cache_key] = {
+                "signals": signals,
+                "chunk_features": chunk_feats,
+                "duration": duration
+            }
         
         # Detection
         detection_result = detector.detect_ai(signals)
         
-        # Chunk Analysis
-        chunk_feats = feature_extraction.extract_chunk_features(y, sr)
+        # Chunk Analysis - aggregate scores from chunk features
         chunk_analysis = detector.aggregate_chunk_scores(chunk_feats)
         
         # Warnings
@@ -66,15 +98,31 @@ def analyze_audio():
         score_breakdown = detection_result.get("score_breakdown", {"pitch":0,"timing":0,"spectral":0})
         robustness_score = 4 if robustness_mode else 0
 
-        # New Additive Confidence Logic (Base 55)
+        # Tiered Confidence Logic (Base 55)
+        # Tier 1: Pitch (High Signal), Chunk Stability
+        # Tier 2: Timing (Supporting)
+        # Tier 3: Spectral (Contextual - Explanation Only, NO confidence impact)
+        
         base_confidence = 55
         
+        pitch_score = score_breakdown.get("pitch", 0)
+        timing_score = score_breakdown.get("timing", 0)
+        stability_score = chunk_analysis.get("stability_score", 0)
+        
+        # Consistency Multiplier (Reinforcement Bonus)
+        # If Pitch Trend (Tier 1) AND Chunk Stability (Tier 1) both indicate AI,
+        # apply a reinforcement bonus.
+        consistency_bonus = 0
+        if pitch_score > 0 and stability_score > 0:
+            consistency_bonus = 10
+        
         additive_boost = (
-            score_breakdown.get("pitch", 0) + 
-            score_breakdown.get("timing", 0) + 
-            score_breakdown.get("spectral", 0) + 
-            chunk_analysis.get("stability_score", 0) + 
-            robustness_score
+            pitch_score +       # Tier 1
+            timing_score +      # Tier 2 (Includes Pause Consistency Bonus)
+            stability_score +   # Tier 1
+            chunk_analysis.get("pitch_consistency_score", 0) + # Tier 1 (Unnatural Consistency)
+            consistency_bonus   # Agreement Bonus
+            # Spectral intentionally excluded from confidence
         )
         
         total_score = base_confidence + additive_boost
