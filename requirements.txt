@@ -1,0 +1,9 @@
+flask
+python-dotenv
+librosa
+numpy
+joblib
+tensorflow
+edge-tts
+datasets
+soundfile

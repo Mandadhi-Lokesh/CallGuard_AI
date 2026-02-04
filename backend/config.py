@@ -1,0 +1,7 @@
+SUPPORTED_LANGUAGES = ["Tamil", "English", "Hindi", "Malayalam", "Telugu"]
+
+CLASS_AI = "AI_GENERATED"
+CLASS_HUMAN = "HUMAN"
+
+CONFIDENCE_MIN = 0.05
+CONFIDENCE_MAX = 0.99
